@@ -9,17 +9,20 @@ import '../../helpers/fakes.dart';
 
 class LoadNextEventHttpRepository {
   final Client httpClient;
+  final String url;
 
-  LoadNextEventHttpRepository({required this.httpClient});
+  LoadNextEventHttpRepository({required this.httpClient, required this.url});
 
   Future<void> loadNextEvent({required String groupId}) async {
-    await httpClient.get(Uri());
+    final uri = Uri.parse(url.replaceFirst(':groupId', groupId));
+    await httpClient.get(uri);
   }
 }
 
 class HttpClientSpy implements Client {
   String? method;
   int callCount = 0;
+  String? url;
 
   @override
   Future<StreamedResponse> send(BaseRequest request) {
@@ -44,6 +47,7 @@ class HttpClientSpy implements Client {
   Future<Response> get(Uri url, {Map<String, String>? headers}) async {
     method = 'get';
     callCount++;
+    this.url = url.toString();
     return Response('', 200);
   }
 
@@ -84,11 +88,30 @@ class HttpClientSpy implements Client {
 }
 
 void main() {
+  late String groupId;
+  late String url;
+  late HttpClientSpy httpClient;
+  late LoadNextEventHttpRepository sut;
+
+  setUpAll(() {
+    url = 'https://domain.com/api/groups/:groupId/next_event';
+  });
+
+  setUp(() {
+    groupId = anyString();
+
+    httpClient = HttpClientSpy();
+    sut = LoadNextEventHttpRepository(httpClient: httpClient, url: url);
+  });
+
   test('should request with correct method', () async {
-    final groupId = anyString();
-    final httpClient = HttpClientSpy();
-    final sut = LoadNextEventHttpRepository(httpClient: httpClient);
     await sut.loadNextEvent(groupId: groupId);
     expect(httpClient.method, 'get');
+    expect(httpClient.callCount, 1);
+  });
+
+  test('should request with correct url', () async {
+    await sut.loadNextEvent(groupId: groupId);
+    expect(httpClient.url, 'https://domain.com/api/groups/$groupId/next_event');
   });
 }
