@@ -25,7 +25,7 @@ abstract class LoadNextEventResository {
   Future<NextEvent> loadNextEvent({required String groupId});
 }
 
-class LoadNextEventMockResository implements LoadNextEventResository {
+class LoadNextEventSpyResository implements LoadNextEventResository {
   String? groupId;
   var callCount = 0;
   NextEvent? output;
@@ -40,12 +40,12 @@ class LoadNextEventMockResository implements LoadNextEventResository {
 
 void main() {
   late String groupId;
-  late LoadNextEventMockResository repo;
+  late LoadNextEventSpyResository repo;
   late NextEventLoader sut;
 
   setUp(() {
     groupId = Random().nextInt(50000).toString();
-    repo = LoadNextEventMockResository();
+    repo = LoadNextEventSpyResository();
     repo.output = NextEvent(
       [
         NextEventPlayer(id: '1', name: 'John Doe', isConfirmed: true),
