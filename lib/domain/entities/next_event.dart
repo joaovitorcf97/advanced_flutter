@@ -5,5 +5,5 @@ class NextEvent {
   final DateTime date;
   final List<NextEventPlayer> players;
 
-  NextEvent(this.players, {required this.groupName, required this.date});
+  NextEvent({required this.groupName, required this.date, required this.players});
 }

@@ -30,7 +30,7 @@ void main() {
     groupId = anyString();
     repo = LoadNextEventSpyResository();
     repo.output = NextEvent(
-      [
+      players: [
         NextEventPlayer(id: '1', name: 'John Doe', isConfirmed: true),
         NextEventPlayer(id: '2', name: 'Jane Smith', isConfirmed: false),
       ],
