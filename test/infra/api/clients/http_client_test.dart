@@ -1,3 +1,4 @@
+import 'package:dartx/dartx.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 
@@ -32,13 +33,18 @@ class HttpClient {
     Map<String, String?>? params,
     Map<String, String>? queryString,
   }) {
-    params?.forEach((key, value) => url = url.replaceFirst(':$key', value ?? ''));
-    if (url.endsWith('/')) url = url.substring(0, url.length - 1);
-    if (queryString != null) {
-      url += '?';
-      queryString.forEach((key, value) => url += '$key=$value&');
-      url = url.substring(0, url.length - 1);
-    }
+    url = url.removeSuffix('/');
+
+    url =
+        params?.keys
+            .fold(url, (result, key) => result.replaceFirst(':$key', params[key] ?? ''))
+            .removeSuffix('/') ??
+        url;
+    url =
+        queryString?.keys
+            .fold('$url?', (result, key) => '$result$key=${queryString[key]}&')
+            .removeSuffix('&') ??
+        url;
 
     return Uri.parse(url);
   }
