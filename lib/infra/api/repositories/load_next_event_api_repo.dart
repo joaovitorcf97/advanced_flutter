@@ -19,6 +19,6 @@ final class LoadNextEventApiRepository implements LoadNextEventResository {
   Future<NextEvent> loadNextEvent({required String groupId}) async {
     final json = await httpClient.get<Json>(url: url, params: {'groupId': groupId});
     if (json == null) throw UnexpectedError();
-    return NextEventMapper.toObject(json);
+    return NextEventMapper().toObject(json);
   }
 }
