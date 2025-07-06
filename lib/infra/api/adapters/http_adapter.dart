@@ -20,15 +20,15 @@ class HttpAdapter implements HttpGetClient {
     Map<String, String?>? params,
     Map<String, String>? queryString,
   }) async {
-    final allHeaders =
-        (headers ?? {})..addAll({
-          'content-type': 'application/json',
-          'accept': 'application/json',
-        });
+    final response = await client.get(
+      _buildUri(url: url, params: params, queryString: queryString),
+      headers: _buildHeaders(url: url, headers: headers),
+    );
 
-    final uri = _buildUri(url: url, params: params, queryString: queryString);
-    final response = await client.get(uri, headers: allHeaders);
+    return _handleResponse<T>(response);
+  }
 
+  T? _handleResponse<T>(Response response) {
     switch (response.statusCode) {
       case 200:
         {
@@ -43,6 +43,16 @@ class HttpAdapter implements HttpGetClient {
       default:
         throw DomainError.unexpected;
     }
+  }
+
+  Map<String, String> _buildHeaders({
+    required String url,
+    Map<String, String>? headers,
+  }) {
+    return (headers ?? {})..addAll({
+      'content-type': 'application/json',
+      'accept': 'application/json',
+    });
   }
 
   Uri _buildUri({
