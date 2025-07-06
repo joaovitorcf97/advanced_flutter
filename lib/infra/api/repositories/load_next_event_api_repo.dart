@@ -1,3 +1,5 @@
+import 'package:advanced_flutter/domain/entities/domain_error.dart';
+
 import '../../../domain/entities/next_event.dart';
 import '../../../domain/repositories/load_next_event_repo.dart';
 import '../../types/json.dart';
@@ -13,6 +15,7 @@ class LoadNextEventApiRepository implements LoadNextEventResository {
   @override
   Future<NextEvent> loadNextEvent({required String groupId}) async {
     final json = await httpClient.get<Json>(url: url, params: {'groupId': groupId});
-    return NextEventMapper.toObject(json!);
+    if (json == null) throw DomainError.unexpected;
+    return NextEventMapper.toObject(json);
   }
 }
