@@ -42,10 +42,11 @@ void main() {
     });
 
     test('should append headers', () async {
-      await sut.get(url: url, headers: {'custom-header': 'value'});
+      await sut.get(url: url, headers: {'custom-header': 'value', 'h3': 123});
       expect(client.headers?['content-type'], 'application/json');
       expect(client.headers?['accept'], 'application/json');
       expect(client.headers?['custom-header'], 'value');
+      expect(client.headers?['h3'], '123');
     });
 
     test('should request with correct params', () async {
