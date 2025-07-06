@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:advanced_flutter/domain/entities/domain_error.dart';
+import 'package:advanced_flutter/infra/types/json.dart';
 import 'package:dartx/dartx.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
@@ -32,7 +33,11 @@ class HttpClient {
 
     switch (response.statusCode) {
       case 200:
-        return jsonDecode(response.body);
+        {
+          final data = jsonDecode(response.body);
+          return (T == JsonArr) ? data.map<Json>((e) => e as Json).toList() : data;
+        }
+
       case 401:
         throw DomainError.sessionExpired;
       default:
@@ -174,9 +179,21 @@ void main() {
           "key2": "value2"
         } 
       ''';
-      final data = await sut.get(url: url);
+      final data = await sut.get<Json>(url: url);
       expect(data['key1'], 'value1');
       expect(data['key2'], 'value2');
+    });
+
+    test('should return a List', () async {
+      client.responseJson = '''
+        [
+          {"key1": "value1"},
+          {"key2": "value2"}
+        ] 
+      ''';
+      final data = await sut.get<JsonArr>(url: url);
+      expect(data[0]['key1'], 'value1');
+      expect(data[1]['key2'], 'value2');
     });
   });
 }
