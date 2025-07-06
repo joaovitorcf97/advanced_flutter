@@ -12,6 +12,7 @@ class ClientSpy implements Client {
   int statusCode = 200;
 
   void simulateBadRequestEror() => statusCode = 400;
+  void simalateNotContent() => statusCode = 204;
   void simulateUnauthorizedError() => statusCode = 401;
   void simulateForbiddenError() => statusCode = 403;
   void simulateNotFoundError() => statusCode = 404;
