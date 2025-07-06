@@ -1,7 +1,7 @@
 import '../../../domain/entities/next_event_player.dart';
 import '../../types/json.dart';
 
-class NextEventPlayerMapper {
+final class NextEventPlayerMapper {
   static List<NextEventPlayer> toList(JsonArr arr) =>
       arr.map(NextEventPlayerMapper.toObject).toList();
 
