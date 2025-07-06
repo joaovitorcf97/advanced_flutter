@@ -1,17 +1,25 @@
 import 'package:advanced_flutter/infra/api/clients/http_get_client.dart';
-import 'package:advanced_flutter/infra/types/json.dart';
 
 class HttpGetClientSpy implements HttpGetClient {
   String? url;
   int callCount = 0;
-  Json? params;
+  Map<String, String>? headers;
+  Map<String, String?>? params;
+  Map<String, String>? queryString;
   dynamic response;
   Error? error;
 
   @override
-  Future<T?> get<T>({required String url, Json? params}) async {
+  Future<T?> get<T>({
+    required String url,
+    Map<String, String>? headers,
+    Map<String, String?>? params,
+    Map<String, String>? queryString,
+  }) async {
     this.url = url;
+    this.headers = headers;
     this.params = params;
+    this.queryString = queryString;
     callCount++;
     if (error != null) {
       throw error!;
