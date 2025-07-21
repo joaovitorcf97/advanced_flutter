@@ -4,6 +4,22 @@ import 'package:rxdart/subjects.dart';
 
 import '../../helpers/fakes.dart';
 
+final class NextEventViewModel {
+  final List<NextEventPlayerViewModel> goalkeepers;
+
+  const NextEventViewModel({
+    this.goalkeepers = const [],
+  });
+}
+
+final class NextEventPlayerViewModel {
+  final String name;
+
+  const NextEventPlayerViewModel({
+    required this.name,
+  });
+}
+
 final class NextEventPage extends StatefulWidget {
   final NextEventPresenter presenter;
   final String groupId;
@@ -28,15 +44,27 @@ class _NextEventPageState extends State<NextEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
+      body: StreamBuilder<NextEventViewModel>(
         stream: widget.presenter.nextEventStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.active) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Center(
-            child: Text('Next Event Loaded'),
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading event'));
+          }
+
+          return ListView(
+            children: [
+              const Text('DENTRO - GOLEIROS'),
+              Text('${snapshot.data?.goalkeepers.length ?? 0}'),
+              ...snapshot.data!.goalkeepers.map(
+                (player) => Text(
+                  player.name,
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -45,20 +73,24 @@ class _NextEventPageState extends State<NextEventPage> {
 }
 
 abstract class NextEventPresenter {
+  Stream<NextEventViewModel> get nextEventStream;
   void loadNextEvent({required String groupId});
-  Stream get nextEventStream;
 }
 
 final class NextEventPresenterSpy implements NextEventPresenter {
   int loadCallsCount = 0;
   String? groupId;
-  var nextEventSubject = BehaviorSubject();
+  var nextEventSubject = BehaviorSubject<NextEventViewModel>();
 
   @override
-  Stream get nextEventStream => nextEventSubject.stream;
+  Stream<NextEventViewModel> get nextEventStream => nextEventSubject.stream;
 
-  void emitNextEvent() {
-    nextEventSubject.add('');
+  void emitNextEvent([NextEventViewModel? viewModel]) {
+    nextEventSubject.add(viewModel ?? const NextEventViewModel());
+  }
+
+  void emitError() {
+    nextEventSubject.addError(Error());
   }
 
   @override
@@ -96,5 +128,32 @@ void main() {
     presenter.emitNextEvent();
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('should hide spinner on load error', (tester) async {
+    await tester.pumpWidget(sut);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    presenter.emitError();
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('should presenter goalkeepers section', (tester) async {
+    await tester.pumpWidget(sut);
+    presenter.emitNextEvent(
+      NextEventViewModel(
+        goalkeepers: [
+          NextEventPlayerViewModel(name: 'Rodrigo'),
+          NextEventPlayerViewModel(name: 'Rafel'),
+          NextEventPlayerViewModel(name: 'Pedro'),
+        ],
+      ),
+    );
+    await tester.pump();
+    expect(find.text('DENTRO - GOLEIROS'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('Rodrigo'), findsOneWidget);
+    expect(find.text('Rafel'), findsOneWidget);
+    expect(find.text('Pedro'), findsOneWidget);
   });
 }
