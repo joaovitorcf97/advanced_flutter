@@ -19,7 +19,10 @@ class NextEventPlayer {
 
   String getInitials() {
     final names = name.split(' ');
-    return '${names[0][0]}${names[1][0]}';
+    final firstChar = names[0][0];
+    final lastChar = names.last[0];
+
+    return '$firstChar$lastChar';
   }
 }
 
@@ -32,5 +35,21 @@ void main() {
     );
 
     expect(player.getInitials(), 'JV');
+
+    final player2 = NextEventPlayer(
+      id: '',
+      name: 'Pedro Henrique',
+      isConfirmed: false,
+    );
+
+    expect(player2.getInitials(), 'PH');
+
+    final player3 = NextEventPlayer(
+      id: '',
+      name: 'Maria Eduarda Silva',
+      isConfirmed: true,
+    );
+
+    expect(player3.getInitials(), 'MS');
   });
 }
